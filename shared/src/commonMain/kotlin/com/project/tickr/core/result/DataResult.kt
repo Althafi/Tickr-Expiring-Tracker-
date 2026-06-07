@@ -9,3 +9,22 @@ inline fun <T, R> DataResult<T>.mapData(transform: (T) -> R): DataResult<R> = wh
     is DataResult.Success -> DataResult.Success(transform(data))
     is DataResult.Error -> this
 }
+
+inline fun <T> DataResult<T>.onSuccess(action: (T) -> Unit): DataResult<T> {
+    if (this is DataResult.Success) action(data)
+    return this
+}
+
+inline fun <T> DataResult<T>.onError(action: (AppError) -> Unit): DataResult<T> {
+    if (this is DataResult.Error) action(error)
+    return this
+}
+
+fun <T> DataResult<T>.getOrNull(): T? =
+    (this as? DataResult.Success)?.data
+
+inline fun <T, R> DataResult<T>.flatMap(transform: (T) -> DataResult<R>): DataResult<R> =
+    when (this) {
+        is DataResult.Success -> transform(data)
+        is DataResult.Error -> this
+    }
