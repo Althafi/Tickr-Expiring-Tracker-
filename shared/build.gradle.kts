@@ -54,12 +54,25 @@ kotlin {
             implementation(libs.supabase.auth)
             implementation(libs.supabase.storage)
             implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.logging)
             implementation(libs.kotlinx.datetime)
+
+            //coroutines
+            implementation(libs.kotlinx.coroutines.core)
+
+            // Koin (Dependency Injection)
+            implementation(libs.koin.core)
+            implementation(libs.koin.compose)
+            implementation(libs.koin.compose.viewmodel)
+
+            // Navigation
+            implementation(libs.navigation.compose)
 
         }
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
-            implementation(libs.ktor.client.cio)
+            implementation(libs.ktor.client.okhttp)
+            implementation(libs.chucker)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
