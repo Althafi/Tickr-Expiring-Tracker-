@@ -35,7 +35,7 @@ fun RegisterSuccessScreen() {
             Spacer(modifier = Modifier.height(TickrTheme.spacing.xl))
 
             Text(
-                text = "Registrasi Berhasil!", // TODO(user): gunakan resource string auth_success_title
+                text = "Registrasi Berhasil!",
                 style = TickrTheme.typography.onboardingTitle,
                 color = TickrTheme.colors.primaryBrand,
                 textAlign = TextAlign.Center,
@@ -44,7 +44,7 @@ fun RegisterSuccessScreen() {
             Spacer(modifier = Modifier.height(TickrTheme.spacing.md))
 
             Text(
-                text = "Akunmu sudah siap. Sekarang kamu bisa mulai mencatat barang dan memantau tanggal kedaluwarsa agar tidak ada lagi yang mubazir.", // TODO(user): gunakan resource string auth_success_body
+                text = "Akunmu berhasil dibuat. Jika ada email konfirmasi, cek inbox-mu dan klik link aktivasi, lalu masuk untuk mulai menggunakan Tickr.",
                 style = TickrTheme.typography.body,
                 color = TickrTheme.colors.textSecondary,
                 textAlign = TextAlign.Center,

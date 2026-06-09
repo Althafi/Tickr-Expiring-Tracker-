@@ -84,7 +84,7 @@ fun LoginScreen(
                 painter = painterResource(Res.drawable.tickr_logo),
                 contentDescription = "Logo Tickr", // TODO(user): gunakan resource string cd_logo_tickr
                 modifier = Modifier
-                    .size(80.dp)
+                    .size(120.dp)
                     .clip(RoundedCornerShape(TickrCornerRadius.card)),
                 contentScale = ContentScale.Fit,
             )

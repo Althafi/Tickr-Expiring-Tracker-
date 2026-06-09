@@ -26,6 +26,9 @@ fun RegisterRoute(
                 RegisterEvent.NavigateToSuccess -> {
                     navigator.navigate(Destination.AuthSuccess)
                 }
+                RegisterEvent.NavigateToFailed -> {
+                    navigator.navigate(Destination.AuthFailed)
+                }
                 RegisterEvent.NavigateToLogin -> {
                     navigator.back()
                 }

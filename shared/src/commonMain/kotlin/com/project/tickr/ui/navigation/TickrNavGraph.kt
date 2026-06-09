@@ -15,6 +15,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.project.tickr.presentation.navigation.Destination
 import com.project.tickr.ui.screen.auth.LoginRoute
+import com.project.tickr.ui.screen.auth.RegisterFailedRoute
 import com.project.tickr.ui.screen.auth.RegisterRoute
 import com.project.tickr.ui.screen.auth.RegisterSuccessRoute
 import com.project.tickr.ui.screen.home.HomePlaceholderScreen
@@ -107,6 +108,20 @@ fun TickrNavGraph(
             exitTransition = { fadeOut(tween(TRANSITION_DURATION)) },
         ) {
             RegisterSuccessRoute(navigator = navigator)
+        }
+
+        // ─── Auth: RegisterFailed ─────────────────────────────────────────────
+        composable(
+            route = Destination.AuthFailed.route,
+            enterTransition = {
+                scaleIn(
+                    animationSpec = tween(TRANSITION_DURATION, easing = FastOutSlowInEasing),
+                    initialScale = 0.92f,
+                ) + fadeIn(tween(TRANSITION_DURATION))
+            },
+            exitTransition = { fadeOut(tween(TRANSITION_DURATION)) },
+        ) {
+            RegisterFailedRoute(navigator = navigator)
         }
 
         // ─── Home (placeholder — TODO: implementasi Phase berikutnya) ─────────

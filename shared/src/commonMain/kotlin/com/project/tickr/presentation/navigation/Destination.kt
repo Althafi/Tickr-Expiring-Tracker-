@@ -9,6 +9,7 @@ sealed interface Destination {
     data object Login : Destination { override val route = "login" }
     data object Register : Destination { override val route = "register" }
     data object AuthSuccess : Destination { override val route = "auth_success" }
+    data object AuthFailed : Destination { override val route = "auth_failed" }
     data object Home : Destination { override val route = "home" }
     data object ItemList : Destination { override val route = "items" }
     data class ItemDetail(val id: Long) : Destination {

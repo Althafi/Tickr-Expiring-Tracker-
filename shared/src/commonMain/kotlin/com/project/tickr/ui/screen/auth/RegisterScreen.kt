@@ -68,13 +68,13 @@ fun RegisterScreen(
         ) {
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Logo kecil
+            // Logo
             Image(
                 painter = painterResource(Res.drawable.tickr_logo),
                 contentDescription = "Logo Tickr", // TODO(user): gunakan resource string cd_logo_tickr
                 modifier = Modifier
-                    .size(52.dp)
-                    .clip(RoundedCornerShape(TickrCornerRadius.thumbnail)),
+                    .size(96.dp)
+                    .clip(RoundedCornerShape(TickrCornerRadius.card)),
                 contentScale = ContentScale.Fit,
             )
 

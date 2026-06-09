@@ -5,6 +5,7 @@ import com.project.tickr.presentation.common.mvi.UiEvent
 
 sealed interface RegisterEvent : UiEvent {
     data object NavigateToSuccess : RegisterEvent
+    data object NavigateToFailed : RegisterEvent
     data object NavigateToLogin : RegisterEvent
     data class ShowError(val message: UiText) : RegisterEvent
 }

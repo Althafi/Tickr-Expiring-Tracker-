@@ -5,11 +5,14 @@ import androidx.lifecycle.viewModelScope
 import com.project.tickr.core.result.AppError
 import com.project.tickr.core.result.onError
 import com.project.tickr.core.result.onSuccess
+import com.project.tickr.domain.model.Profile
 import com.project.tickr.domain.usecase.auth.RegisterUseCase
 import com.project.tickr.domain.usecase.auth.ValidateEmailUseCase
 import com.project.tickr.domain.usecase.auth.ValidateNameUseCase
 import com.project.tickr.domain.usecase.auth.ValidatePasswordUseCase
 import com.project.tickr.core.validation.ValidationResult
+import com.project.tickr.domain.usecase.profile.UpsertProfileUseCase
+import com.project.tickr.presentation.common.AuthErrorStore
 import com.project.tickr.presentation.common.toUiText
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,12 +21,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.time.Clock
 
 class RegisterViewModel(
     private val registerUseCase: RegisterUseCase,
     private val validateEmail: ValidateEmailUseCase,
     private val validatePassword: ValidatePasswordUseCase,
     private val validateName: ValidateNameUseCase,
+    private val authErrorStore: AuthErrorStore,
+    private val upsertProfile: UpsertProfileUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(RegisterUiState())
@@ -85,7 +91,18 @@ class RegisterViewModel(
 
         viewModelScope.launch {
             registerUseCase(s.fullName, s.email, s.password)
-                .onSuccess {
+                .onSuccess { session ->
+                    // Create profile row in Supabase when session is available
+                    // (email confirmation OFF → userId is non-empty after signUp)
+                    if (session.userId.isNotEmpty()) {
+                        upsertProfile(
+                            Profile(
+                                id = session.userId,
+                                fullName = session.fullName,
+                                updatedAt = Clock.System.now().toString(),
+                            )
+                        )
+                    }
                     _state.update { it.copy(isLoading = false) }
                     _events.send(RegisterEvent.NavigateToSuccess)
                 }
@@ -96,16 +113,19 @@ class RegisterViewModel(
                             _state.update { it.copy(emailError = error.reason.toUiText()) }
                         }
                         else -> {
-                            _events.send(RegisterEvent.ShowError(errorMessage(error).toUiText()))
+                            authErrorStore.lastRegisterError = mapError(error)
+                            _events.send(RegisterEvent.NavigateToFailed)
                         }
                     }
                 }
         }
     }
 
-    private fun errorMessage(error: AppError): String = when (error) {
-        is AppError.Network -> "Koneksi gagal. Periksa internet Anda."
+    private fun mapError(error: AppError): String = when (error) {
+        is AppError.Network -> "Koneksi gagal. Periksa koneksi internet Anda."
+        is AppError.Unauthorized -> "Email atau kata sandi tidak valid."
         is AppError.Validation -> error.reason
+        is AppError.Unknown -> error.detail.ifBlank { "Terjadi kesalahan. Coba lagi." }
         else -> "Terjadi kesalahan. Coba lagi."
     }
 }

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="100dp"
+    android:height="100dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+
+    <!-- Outer shadow ring (dark green base) -->
+    <path
+        android:fillColor="#388E3C"
+        android:pathData="M50,3 A47,47 0 1,0 50,97 A47,47 0 1,0 50,3 Z"/>
+
+    <!-- Main green ring -->
+    <path
+        android:fillColor="#66BB6A"
+        android:pathData="M50,7 A43,43 0 1,0 50,93 A43,43 0 1,0 50,7 Z"/>
+
+    <!-- Highlight arc (top-right quarter, lighter green) -->
+    <path
+        android:fillColor="#504CAF50"
+        android:pathData="M50,7 A43,43 0 0,1 93,50 L88,50 A38,38 0 0,0 50,12 Z"/>
+
+    <!-- White inner circle -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M50,27 A23,23 0 1,0 50,73 A23,23 0 1,0 50,27 Z"/>
+
+    <!-- Checkmark stroke -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#66BB6A"
+        android:strokeWidth="7"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M32,51 L43,64 L70,36"/>
+</vector>

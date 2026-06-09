@@ -1,46 +1,200 @@
 package com.project.tickr.data.repository
 
+import com.project.tickr.core.network.SupabaseProvider
 import com.project.tickr.core.result.AppError
 import com.project.tickr.core.result.DataResult
 import com.project.tickr.domain.model.AuthUser
 import com.project.tickr.domain.model.UserSession
 import com.project.tickr.domain.repository.AuthRepository
 import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.providers.builtin.Email
+import io.github.jan.supabase.exceptions.RestException
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.put
 
-// TODO(user): Aktifkan SupabaseAuthRepository ini saat Supabase Auth siap.
-// Ganti FakeAuthRepository → SupabaseAuthRepository di DataModule (DI) saja;
-// domain & presentation TIDAK berubah.
-class AuthRepositoryImpl(
-    private val client: SupabaseClient
-) : AuthRepository {
+class AuthRepositoryImpl : AuthRepository {
 
-    override suspend fun signUp(email: String, password: String): DataResult<AuthUser> =
-        DataResult.Error(AppError.Unknown("Use register() — Supabase not yet wired"))
+    private val client: SupabaseClient by lazy { SupabaseProvider.client }
 
-    override suspend fun signIn(email: String, password: String): DataResult<AuthUser> =
-        DataResult.Error(AppError.Unknown("Use login() — Supabase not yet wired"))
+    // Supabase-kt v3.x throws IllegalStateException instead of returning null
+    // when no session key exists in local storage yet.
+    private fun safeCurrentSession() = try {
+        client.auth.currentSessionOrNull()
+    } catch (e: Exception) {
+        null
+    }
 
-    override suspend fun signOut(): DataResult<Unit> =
-        DataResult.Error(AppError.Unknown("Supabase not yet wired"))
+    private fun safeCurrentUser() = try {
+        client.auth.currentUserOrNull()
+    } catch (e: Exception) {
+        null
+    }
 
-    override suspend fun resetPassword(email: String): DataResult<Unit> =
-        DataResult.Error(AppError.Unknown("Supabase not yet wired"))
+    override suspend fun signUp(email: String, password: String): DataResult<AuthUser> = try {
+        client.auth.signUpWith(Email) {
+            this.email = email
+            this.password = password
+        }
+        val user = safeCurrentUser()
+        DataResult.Success(AuthUser(user?.id ?: "", user?.email ?: email))
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        DataResult.Error(AppError.Unknown(debugMessage(e)))
+    }
 
-    override fun observeSession(): Flow<AuthUser?> = emptyFlow()
+    override suspend fun signIn(email: String, password: String): DataResult<AuthUser> = try {
+        client.auth.signInWith(Email) {
+            this.email = email
+            this.password = password
+        }
+        val user = safeCurrentUser()
+        DataResult.Success(AuthUser(user?.id ?: "", user?.email ?: email))
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        DataResult.Error(AppError.Unknown(debugMessage(e)))
+    }
 
-    override fun currentUserId(): String? = null
+    override suspend fun signOut(): DataResult<Unit> = try {
+        client.auth.signOut()
+        DataResult.Success(Unit)
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        DataResult.Error(AppError.Network)
+    }
 
-    // TODO(user): implementasi dengan gotrue (supabase-kt)
-    override suspend fun login(identifier: String, password: String): DataResult<UserSession> =
-        DataResult.Error(AppError.Unknown("Supabase not yet wired"))
+    override suspend fun resetPassword(email: String): DataResult<Unit> = try {
+        client.auth.resetPasswordForEmail(email)
+        DataResult.Success(Unit)
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        DataResult.Error(AppError.Network)
+    }
 
-    // TODO(user): implementasi dengan gotrue (supabase-kt)
-    override suspend fun register(fullName: String, email: String, password: String): DataResult<UserSession> =
-        DataResult.Error(AppError.Unknown("Supabase not yet wired"))
+    // Emit outside the catch block to avoid Kotlin Flow exception transparency violation.
+    // AbortFlowException (from first()) is a CancellationException — if caught inside the
+    // flow builder it would cause "Emissions from catch blocks are prohibited" crash.
+    override fun observeSession(): Flow<AuthUser?> = flow {
+        val result = try {
+            val user = safeCurrentUser()
+            user?.let { AuthUser(it.id, it.email ?: "") }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            null
+        }
+        emit(result)
+    }
 
-    // TODO(user): implementasi Google/OAuth (Supabase) — jangan panggil apa pun
+    override fun currentUserId(): String? = safeCurrentUser()?.id
+
+    override suspend fun login(identifier: String, password: String): DataResult<UserSession> {
+        return try {
+            client.auth.signInWith(Email) {
+                this.email = identifier
+                this.password = password
+            }
+            val supaSession = safeCurrentSession()
+                ?: return DataResult.Error(AppError.Unknown("Login gagal: session null setelah signIn"))
+            val user = supaSession.user
+                ?: return DataResult.Error(AppError.Unknown("Login gagal: user null di session"))
+
+            DataResult.Success(
+                UserSession(
+                    userId = user.id,
+                    email = user.email ?: identifier,
+                    fullName = user.userMetadata
+                        ?.get("full_name")?.jsonPrimitive?.contentOrNull ?: "",
+                    accessToken = supaSession.accessToken,
+                )
+            )
+        } catch (e: RestException) {
+            when {
+                e.message?.contains("Invalid login credentials", ignoreCase = true) == true ||
+                e.message?.contains("invalid_grant", ignoreCase = true) == true ||
+                e.message?.contains("Email not confirmed", ignoreCase = true) == true ->
+                    DataResult.Error(AppError.Unauthorized)
+                else -> DataResult.Error(AppError.Unknown("Login RestException: ${e.message}"))
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            DataResult.Error(AppError.Unknown(debugMessage(e)))
+        }
+    }
+
+    override suspend fun register(
+        fullName: String,
+        email: String,
+        password: String,
+    ): DataResult<UserSession> {
+        return try {
+            client.auth.signUpWith(Email) {
+                this.email = email
+                this.password = password
+                data = buildJsonObject { put("full_name", fullName) }
+            }
+
+            var supaSession = safeCurrentSession()
+
+            // If no session (email confirmation ON), try signing in immediately.
+            // Succeeds if Supabase doesn't require confirmation.
+            if (supaSession == null) {
+                try {
+                    client.auth.signInWith(Email) {
+                        this.email = email
+                        this.password = password
+                    }
+                    supaSession = safeCurrentSession()
+                } catch (_: Exception) {
+                    // signIn failure = email confirmation still required; proceed without session
+                }
+            }
+
+            if (supaSession != null) {
+                val user = supaSession.user
+                DataResult.Success(
+                    UserSession(
+                        userId = user?.id ?: "",
+                        email = user?.email ?: email,
+                        fullName = user?.userMetadata
+                            ?.get("full_name")?.jsonPrimitive?.contentOrNull ?: fullName,
+                        accessToken = supaSession.accessToken,
+                    )
+                )
+            } else {
+                // Registration succeeded but session pending email confirmation
+                DataResult.Success(
+                    UserSession(userId = "", email = email, fullName = fullName, accessToken = "")
+                )
+            }
+        } catch (e: RestException) {
+            when {
+                e.message?.contains("already registered", ignoreCase = true) == true ||
+                e.message?.contains("User already registered", ignoreCase = true) == true ->
+                    DataResult.Error(AppError.Validation("email", "Email ini sudah terdaftar."))
+                else ->
+                    DataResult.Error(AppError.Unknown("Register RestException: ${e.message}"))
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            DataResult.Error(AppError.Unknown(debugMessage(e)))
+        }
+    }
+
     override suspend fun loginWithGoogle(): DataResult<UserSession> =
         DataResult.Error(AppError.Unknown("Google OAuth not implemented"))
+
+    private fun debugMessage(e: Exception): String =
+        "[${e::class.simpleName}] ${e.message ?: "no message"}"
 }

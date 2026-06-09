@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="100dp"
+    android:height="100dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+
+    <!-- Outer shadow ring (dark red base) -->
+    <path
+        android:fillColor="#C62828"
+        android:pathData="M50,3 A47,47 0 1,0 50,97 A47,47 0 1,0 50,3 Z"/>
+
+    <!-- Main red ring -->
+    <path
+        android:fillColor="#EF5350"
+        android:pathData="M50,7 A43,43 0 1,0 50,93 A43,43 0 1,0 50,7 Z"/>
+
+    <!-- Highlight arc (top-right quarter, lighter red) -->
+    <path
+        android:fillColor="#50EF9A9A"
+        android:pathData="M50,7 A43,43 0 0,1 93,50 L88,50 A38,38 0 0,0 50,12 Z"/>
+
+    <!-- White inner circle -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M50,27 A23,23 0 1,0 50,73 A23,23 0 1,0 50,27 Z"/>
+
+    <!-- X mark (two crossing lines) -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#EF5350"
+        android:strokeWidth="7"
+        android:strokeLineCap="round"
+        android:pathData="M37,37 L63,63"/>
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#EF5350"
+        android:strokeWidth="7"
+        android:strokeLineCap="round"
+        android:pathData="M63,37 L37,63"/>
+</vector>
