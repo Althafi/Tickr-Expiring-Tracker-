@@ -64,4 +64,52 @@
     <string name="cd_google_icon">Ikon Google</string>
     <string name="cd_toggle_password">Tampilkan atau sembunyikan kata sandi</string>
     <string name="cd_success_check">Ikon registrasi berhasil</string>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- Home Strings — Phase 3.5                                       -->
+    <!-- TODO(user): sesuaikan semua nilai di bawah                     -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <string name="home_greeting">Selamat Datang, %1$s</string>
+    <string name="home_subtitle">Cek status barangmu hari ini.</string>
+    <string name="home_insight_text">Bagus sekali! Bulan ini tingkat makanan terbuangmu turun %1$d%%.</string>
+    <string name="home_insight_sub">Terus pertahankan kebiasaan baik ini.</string>
+    <string name="home_insight_empty">Catat &amp; habiskan barang untuk melihat tren penghematanmu.</string>
+    <string name="home_consumption_title">Kategori Konsumsi</string>
+    <string name="home_see_all">Lihat Semua</string>
+    <string name="home_donut_total_label">TOTAL</string>
+    <string name="home_expiring_title">Produk Kadaluwarsa</string>
+    <string name="home_need_action">PERLU TINDAKAN</string>
+    <string name="home_critical_summary">Kritis: %1$d item</string>
+    <string name="home_empty_title">Belum ada barang</string>
+    <string name="home_empty_body">Mulai catat barangmu agar tak ada yang kedaluwarsa terlewat.</string>
+    <string name="home_empty_cta">Tambah Barang Pertama</string>
+    <string name="countdown_today">Hari ini</string>
+    <string name="countdown_day">%1$d hari</string>
+    <string name="countdown_month_day">%1$d bulan %2$d hari</string>
+    <string name="countdown_month">%1$d bulan</string>
+    <string name="countdown_expired">Lewat %1$d hari</string>
+    <string name="nav_home">Beranda</string>
+    <string name="nav_history">Kadaluwarsa</string>
+    <string name="nav_insight">Wawasan</string>
+    <string name="nav_profile">Profil</string>
+    <string name="cd_home_notification">Buka notifikasi</string>
+    <string name="cd_home_add">Tambah barang baru</string>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- AddItem Strings — Phase 3.5                                    -->
+    <!-- TODO(user): sesuaikan semua nilai di bawah                     -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <string name="additem_title">Tambah Barang</string>
+    <string name="additem_photo_hint">Ketuk untuk unggah foto</string>
+    <string name="additem_name_hint">Nama Produk</string>
+    <string name="additem_category_label">Kategori</string>
+    <string name="additem_category_more">+ Lainnya</string>
+    <string name="additem_qty_label">Jumlah</string>
+    <string name="additem_unit_label">Satuan</string>
+    <string name="additem_unit_default">Pcs</string>
+    <string name="additem_expiry_label">Waktu Kedaluwarsa</string>
+    <string name="additem_expiry_hint">DD / MM / YYYY</string>
+    <string name="additem_cta_save">Catat Barang</string>
+    <string name="cd_additem_close">Tutup</string>
+    <string name="cd_additem_photo">Unggah foto produk</string>
 </resources>

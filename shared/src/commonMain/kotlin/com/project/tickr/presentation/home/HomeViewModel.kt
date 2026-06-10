@@ -4,11 +4,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.project.tickr.core.result.onError
 import com.project.tickr.core.result.onSuccess
-import com.project.tickr.domain.error.ErrorMessageProvider
+import com.project.tickr.core.util.DateTimeUtil
+import com.project.tickr.domain.model.Urgency
 import com.project.tickr.domain.usecase.auth.GetCurrentUserIdUseCase
-import com.project.tickr.domain.usecase.item.GetExpiringItemsUseCase
+import com.project.tickr.domain.usecase.home.GetCategoryConsumptionUseCase
+import com.project.tickr.domain.usecase.home.GetExpiringItemsGroupedUseCase
+import com.project.tickr.domain.usecase.home.GetWasteTrendUseCase
+import com.project.tickr.domain.usecase.profile.GetProfileUseCase
 import com.project.tickr.presentation.navigation.Destination
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,9 +22,12 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
-    private val getExpiringItems: GetExpiringItemsUseCase,
+    private val getExpiringGrouped: GetExpiringItemsGroupedUseCase,
+    private val getCategoryConsumption: GetCategoryConsumptionUseCase,
+    private val getWasteTrend: GetWasteTrendUseCase,
+    private val getProfile: GetProfileUseCase,
     private val getCurrentUserId: GetCurrentUserIdUseCase,
-    private val errorMessages: ErrorMessageProvider
+    private val dateTime: DateTimeUtil,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeUiState())
@@ -28,31 +36,81 @@ class HomeViewModel(
     private val _events = Channel<HomeEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
 
+    init {
+        startClockTicker()
+        load()
+    }
+
     fun onAction(action: HomeAction) {
         when (action) {
             HomeAction.Load, HomeAction.Refresh -> load()
+            HomeAction.OpenNotifications -> viewModelScope.launch {
+                _events.send(HomeEvent.NavigateToNotifications)
+            }
+            HomeAction.OpenAddItem -> viewModelScope.launch {
+                _events.send(HomeEvent.ShowAddItemSheet)
+            }
+            HomeAction.SeeAllCategories -> { /* navigate to categories — TODO */ }
             is HomeAction.ClickItem -> viewModelScope.launch {
-                _events.send(HomeEvent.NavigateToDetail(Destination.ItemDetail(action.id)))
+                _events.send(HomeEvent.NavigateToItemDetail(Destination.ItemDetail(action.id)))
+            }
+            is HomeAction.TabSelected -> { /* handled by MainShell */ }
+        }
+    }
+
+    private fun startClockTicker() {
+        viewModelScope.launch {
+            while (true) {
+                val now = dateTime.nowEpochMillis()
+                _state.update {
+                    it.copy(
+                        nowEpochMillis = now,
+                        displayDate = dateTime.formatDisplayDate(now),
+                        displayTime = dateTime.formatDisplayTime(now),
+                    )
+                }
+                delay(1_000L)
             }
         }
     }
 
     private fun load() {
         val userId = getCurrentUserId() ?: run {
-            _state.update { it.copy(isLoading = false, error = "Session expired") }
+            _state.update { it.copy(isLoading = false, error = "Sesi habis, silakan masuk kembali") }
             return
         }
         _state.update { it.copy(isLoading = true, error = null) }
+
         viewModelScope.launch {
-            getExpiringItems(userId)
-                .onSuccess { items ->
-                    _state.update {
-                        it.copy(isLoading = false, expiringItems = items, expiringCount = items.size)
-                    }
+            getProfile(userId).onSuccess { profile ->
+                _state.update { it.copy(userName = profile.fullName ?: "") }
+            }
+        }
+        viewModelScope.launch {
+            getExpiringGrouped(userId).onSuccess { groups ->
+                val criticalCount = groups.sumOf { g ->
+                    g.items.count { it.urgency == Urgency.CRITICAL }
                 }
-                .onError { error ->
-                    _state.update { it.copy(isLoading = false, error = errorMessages.provide(error)) }
+                _state.update {
+                    it.copy(expiringGroups = groups, criticalCount = criticalCount)
                 }
+            }.onError { err ->
+                _state.update { it.copy(error = err.message) }
+            }
+        }
+        viewModelScope.launch {
+            getCategoryConsumption(userId).onSuccess { slices ->
+                val total = slices.sumOf { it.count }
+                _state.update { it.copy(slices = slices, totalItems = total) }
+            }
+        }
+        viewModelScope.launch {
+            getWasteTrend(userId).onSuccess { trend ->
+                _state.update { it.copy(wasteTrend = trend) }
+            }
+        }
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = false) }
         }
     }
 }

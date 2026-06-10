@@ -18,7 +18,7 @@ import com.project.tickr.ui.screen.auth.LoginRoute
 import com.project.tickr.ui.screen.auth.RegisterFailedRoute
 import com.project.tickr.ui.screen.auth.RegisterRoute
 import com.project.tickr.ui.screen.auth.RegisterSuccessRoute
-import com.project.tickr.ui.screen.home.HomePlaceholderScreen
+// HomePlaceholderScreen diganti oleh MainShell
 import com.project.tickr.ui.screen.onboarding.OnboardingRoute
 
 private const val TRANSITION_DURATION = 300
@@ -124,7 +124,7 @@ fun TickrNavGraph(
             RegisterFailedRoute(navigator = navigator)
         }
 
-        // ─── Home (placeholder — TODO: implementasi Phase berikutnya) ─────────
+        // ─── Home (MainShell — Phase 3.5) ────────────────────────────────────
         composable(
             route = Destination.Home.route,
             enterTransition = {
@@ -133,7 +133,7 @@ fun TickrNavGraph(
                 ) { it / 12 } + fadeIn(tween(TRANSITION_DURATION))
             },
         ) {
-            HomePlaceholderScreen()
+            MainShell(navigator = navigator)
         }
 
         // Legacy Auth route (kept untuk backward compat dengan kode lama)

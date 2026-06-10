@@ -36,6 +36,10 @@ import com.project.tickr.domain.usecase.profile.GetProfileUseCase
 import com.project.tickr.domain.usecase.profile.UpsertProfileUseCase
 import com.project.tickr.domain.usecase.onboarding.GetOnboardingSeenUseCase
 import com.project.tickr.domain.usecase.onboarding.CompleteOnboardingUseCase
+import com.project.tickr.domain.usecase.home.AddItemUseCase
+import com.project.tickr.domain.usecase.home.GetCategoryConsumptionUseCase
+import com.project.tickr.domain.usecase.home.GetExpiringItemsGroupedUseCase
+import com.project.tickr.domain.usecase.home.GetWasteTrendUseCase
 import org.koin.dsl.module
 
 val domainModule = module {
@@ -81,4 +85,10 @@ val domainModule = module {
 
     factory { GetOnboardingSeenUseCase(get()) }
     factory { CompleteOnboardingUseCase(get()) }
+
+    // Phase 3.5 Home use cases
+    factory { GetCategoryConsumptionUseCase(get(), get()) }
+    factory { GetWasteTrendUseCase(get(), get()) }
+    factory { GetExpiringItemsGroupedUseCase(get(), get(), get()) }
+    factory { AddItemUseCase(get(), get()) }
 }

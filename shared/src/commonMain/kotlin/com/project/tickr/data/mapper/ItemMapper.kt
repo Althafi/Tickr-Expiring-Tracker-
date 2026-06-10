@@ -13,6 +13,8 @@ fun ItemDto.toDomain() = Item(
     imageUrl = imageUrl,
     notes = notes,
     isConsumed = isConsumed,
+    quantity = quantity,
+    unit = unit,
     createdAt = createdAt,
     updatedAt = updatedAt
 )
@@ -27,6 +29,8 @@ fun Item.toDto() = ItemDto(
     imageUrl = imageUrl,
     notes = notes,
     isConsumed = isConsumed,
+    quantity = quantity,
+    unit = unit,
     createdAt = createdAt,
     updatedAt = updatedAt
 )

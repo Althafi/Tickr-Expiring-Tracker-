@@ -11,6 +11,12 @@ data class TickrTypography(
     val productName: TextStyle,
     val body: TextStyle,
     val countdown: TextStyle,
+    // Phase 3.5 Home tokens
+    val displayClock: TextStyle,
+    val greetingTitle: TextStyle,
+    val sectionTitle: TextStyle,
+    val donutTotalNum: TextStyle,
+    val caption: TextStyle,
 )
 
 fun tickrTypography(): TickrTypography = TickrTypography(
@@ -33,8 +39,29 @@ fun tickrTypography(): TickrTypography = TickrTypography(
         fontWeight = FontWeight.Medium,
     ),
     countdown = TextStyle(
-        fontSize = 13.sp,
+        fontSize = 12.sp,
         fontWeight = FontWeight.SemiBold,
+    ),
+    displayClock = TextStyle(
+        fontSize = 17.sp,
+        fontWeight = FontWeight.Bold,
+        fontFeatureSettings = "tnum", // tabular figures
+    ),
+    greetingTitle = TextStyle(
+        fontSize = 26.sp,
+        fontWeight = FontWeight.Bold,
+    ),
+    sectionTitle = TextStyle(
+        fontSize = 18.sp,
+        fontWeight = FontWeight.Bold,
+    ),
+    donutTotalNum = TextStyle(
+        fontSize = 24.sp,
+        fontWeight = FontWeight.Bold,
+    ),
+    caption = TextStyle(
+        fontSize = 12.sp,
+        fontWeight = FontWeight.Medium,
     ),
 )
 

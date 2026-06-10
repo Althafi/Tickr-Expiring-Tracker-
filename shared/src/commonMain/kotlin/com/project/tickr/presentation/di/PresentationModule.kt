@@ -1,5 +1,6 @@
 package com.project.tickr.presentation.di
 
+import com.project.tickr.presentation.additem.AddItemViewModel
 import com.project.tickr.presentation.auth.AuthViewModel
 import com.project.tickr.presentation.common.AuthErrorStore
 import com.project.tickr.presentation.login.LoginViewModel
@@ -20,7 +21,8 @@ val presentationModule = module {
     factory { LoginViewModel(get()) }
     factory { RegisterViewModel(get(), get(), get(), get(), get(), get()) }
     factory { OnboardingViewModel(get()) }
-    factory { HomeViewModel(get(), get(), get()) }
+    factory { HomeViewModel(get(), get(), get(), get(), get(), get()) }
+    factory { AddItemViewModel(get(), get(), get(), get()) }
     factory { ItemListViewModel(get(), get(), get(), get(), get()) }
     factory { ItemDetailViewModel(get(), get(), get(), get()) }
     factory { ItemFormViewModel(get(), get(), get(), get(), get()) }

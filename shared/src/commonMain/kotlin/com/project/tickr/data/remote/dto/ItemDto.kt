@@ -14,6 +14,8 @@ data class ItemDto(
     @SerialName("image_url") val imageUrl: String? = null,
     @SerialName("notes") val notes: String? = null,
     @SerialName("is_consumed") val isConsumed: Boolean,
+    @SerialName("quantity") val quantity: Int = 1,
+    @SerialName("unit") val unit: String = "Pcs",
     @SerialName("created_at") val createdAt: String,
     @SerialName("updated_at") val updatedAt: String
 )

@@ -10,6 +10,8 @@ data class Item(
     val imageUrl: String?,
     val notes: String?,
     val isConsumed: Boolean,
+    val quantity: Int = 1,
+    val unit: String = "Pcs",
     val createdAt: String,
     val updatedAt: String
 )
